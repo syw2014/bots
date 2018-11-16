@@ -174,10 +174,9 @@ def store_vocabulary(vocab_processor, outfile):
     with open(outfile, 'w') as f:
         for id in range(vocab_size):
             word = vocab_processor.vocabulary._reverse_mapping[id]
-            # print(word, str(id))
             if is_need_remove(word):
                 continue
-            f.write(word + "\t" + str(id))
+            f.write(word.strip() + "\t" + str(id))
             f.write('\n')
     print("Saved vocabulary in {}".format(outfile))
 
