@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author  : Jerry.Shi
-# File    : vocabuary_tools.py
+# File    : vocabulary_tools.py
 # PythonVersion: python3.5
 # Date    : 2018/11/14 19:47
 # Software: PyCharm
@@ -23,6 +23,24 @@ try:
 except ImportError:
   # pylint: disable=g-import-not-at-top
   import pickle
+
+
+def is_need_remove(word):
+    """
+    To check word is need remove or not.
+    Remove rules:
+        - white character, space, tab
+    :param word: input token
+    :return: if true need remove
+    """
+    if len(word.strip('\t')) == 0:
+        return True
+    elif len(word.strip(' ')) == 0:
+        return True
+    elif len(word) == 0:
+        return True
+    else:
+        return False
 
 
 class CategoricalVocabulary(object):
@@ -57,8 +75,10 @@ class CategoricalVocabulary(object):
         if category not in self._mapping:
             if self._freeze:  # Freeze dict, not insert new word return unknown id
                 return 0
+            if is_need_remove(category):
+                return 0
             self._mapping[category] = len(self._mapping)
-            if self._support_reverse:
+            if self._support_reverse and not is_need_remove(category):
                 self._reverse_mapping.append(category)
         return self._mapping[category]
 
@@ -72,7 +92,7 @@ class CategoricalVocabulary(object):
         category_id = self.get(category)
         if category_id <= 0:   # if category not in dictionary, frequency add nothing
             return
-        self._freq[category_id] += count
+        self._freq[category] += count
 
     def trim(self, min_frequency, max_frequency=-1):
         """
@@ -95,6 +115,8 @@ class CategoricalVocabulary(object):
             self._reverse_mapping = [self._unknown_token]
         idx = 1
         for category, count in self._freq:
+            if is_need_remove(category):
+                continue
             # check count bigger than maximum frequency
             if 0 < max_frequency <= count:
                 continue
@@ -176,7 +198,7 @@ class VocabularyProcessor(object):
         for tokens in self._tokenizer(raw_documents):
             word_ids = np.zeros(self.max_document_length, np.int64)
             for idx, token in enumerate(tokens):
-                if idx > self.max_document_length:
+                if idx >= self.max_document_length:
                     break
                 word_ids[idx] = self.vocabulary.get(token)
             yield word_ids
