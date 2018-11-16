@@ -33,9 +33,10 @@ def is_need_remove(word):
     :param word: input token
     :return: if true need remove
     """
-    if len(word.strip('\t')) == 0:
+    if len(word.strip('\n')) == 0:
         return True
-    elif len(word.strip(' ')) == 0:
+    elif len(word.strip()) == 0:
+
         return True
     elif len(word) == 0:
         return True
@@ -72,6 +73,7 @@ class CategoricalVocabulary(object):
         :param category, the word or category want to found in the vocabulary
         :return word's id in the vocabulary
         """
+        category = category.strip()
         if category not in self._mapping:
             if self._freeze:  # Freeze dict, not insert new word return unknown id
                 return 0
@@ -89,6 +91,7 @@ class CategoricalVocabulary(object):
         :param count: term frequency
         :return:
         """
+        category = category.strip()
         category_id = self.get(category)
         if category_id <= 0:   # if category not in dictionary, frequency add nothing
             return
